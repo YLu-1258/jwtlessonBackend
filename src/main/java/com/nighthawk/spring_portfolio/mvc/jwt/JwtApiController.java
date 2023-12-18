@@ -19,43 +19,67 @@ import com.nighthawk.spring_portfolio.mvc.person.PersonDetailsService;
 
 @RestController
 @CrossOrigin
+
+// PURPOSE
+// Handles user login/authentication 
+// Generates & issues JWTs upon successful authentication 
+
 public class JwtApiController {
 
-	@Autowired
-	private AuthenticationManager authenticationManager;
+    // Three important dependencies
 
-	@Autowired
-	private JwtTokenUtil jwtTokenUtil;
+    @Autowired
+    // Authenticate users
+    private AuthenticationManager authenticationManager;
 
-	@Autowired
-	private PersonDetailsService personDetailsService;
+    @Autowired
+    // Validate JWTs
+    private JwtTokenUtil jwtTokenUtil;
 
-	@PostMapping("/authenticate")
-	public ResponseEntity<?> createAuthenticationToken(@RequestBody Person authenticationRequest) throws Exception {
-		authenticate(authenticationRequest.getEmail(), authenticationRequest.getPassword());
-		final UserDetails userDetails = personDetailsService
-				.loadUserByUsername(authenticationRequest.getEmail());
-		final String token = jwtTokenUtil.generateToken(userDetails);
-		final ResponseCookie tokenCookie = ResponseCookie.from("jwt", token)
-			.httpOnly(true)
-			.secure(true)
-			.path("/")
-			.maxAge(3600)
-			.sameSite("None; Secure")
-			// .domain("example.com") // Set to backend domain
-			.build();
-		return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, tokenCookie.toString()).build();
-	}
+    @Autowired
+    // Retrieve user info
+    private PersonDetailsService personDetailsService;
 
-	private void authenticate(String username, String password) throws Exception {
-		try {
-			authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-		} catch (DisabledException e) {
-			throw new Exception("USER_DISABLED", e);
-		} catch (BadCredentialsException e) {
-			throw new Exception("INVALID_CREDENTIALS", e);
-		} catch (Exception e) {
-			throw new Exception(e);
-		}
-	}
+    // Controller method handles HTTP POST requests to this endpoint
+    @PostMapping("/authenticate")
+    public ResponseEntity<?> createAuthenticationToken(@RequestBody Person authenticationRequest) throws Exception {
+        // Authenticate the user
+        authenticate(authenticationRequest.getEmail(), authenticationRequest.getPassword());
+
+        // Load user details
+        final UserDetails userDetails = personDetailsService.loadUserByUsername(authenticationRequest.getEmail());
+
+        // Generate JWT
+        final String token = jwtTokenUtil.generateToken(userDetails);
+
+        // Create an HTTP-only secure cookie with the JWT
+        final ResponseCookie tokenCookie = ResponseCookie.from("jwt", token)
+            .httpOnly(true)
+            .secure(true)
+            .path("/")
+            .maxAge(3600)
+            .sameSite("None; Secure")
+            // .domain("example.com") // Set to backend domain if needed
+            .build();
+
+        // Return HTTP response with JWT cookie
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, tokenCookie.toString()).build();
+    }
+
+    // Called internally to authenticate the user
+    private void authenticate(String username, String password) throws Exception {
+        try {
+            // Use AuthenticationManager to authenticate the user based on provided credentials
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+        } catch (DisabledException e) {
+            // Handle if the user account is disabled
+            throw new Exception("USER_DISABLED", e);
+        } catch (BadCredentialsException e) {
+            // Handle if provided credentials are invalid
+            throw new Exception("INVALID_CREDENTIALS", e);
+        } catch (Exception e) {
+            // Handle other authentication exceptions
+            throw new Exception(e);
+        }
+    }
 }

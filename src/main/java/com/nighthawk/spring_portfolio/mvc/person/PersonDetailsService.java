@@ -12,12 +12,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-/*
-This class has an instance of Java Persistence API (JPA)
--- @Autowired annotation. Allows Spring to resolve and inject collaborating beans into our bean.
--- Spring Data JPA will generate a proxy instance
--- Below are some CRUD methods that we can use with our database
-*/
+// PURPOSE: Retrieve user details based on username
+
 @Service
 @Transactional
 public class PersonDetailsService implements UserDetailsService {  // "implements" ties ModelRepo to Spring Security
@@ -34,15 +30,18 @@ public class PersonDetailsService implements UserDetailsService {  // "implement
     /* UserDetailsService Overrides and maps Person & Roles POJO into Spring Security */
     @Override
     public org.springframework.security.core.userdetails.UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        // Retrieve user details based on the email (username) from the database
         Person person = personJpaRepository.findByEmail(email); // setting variable user equal to the method finding the username in the database
         if(person==null) {
 			throw new UsernameNotFoundException("User not found with username: " + email);
         }
+
+        // Map the user roles to SimpleGrantedAuthority objects
         Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
         person.getRoles().forEach(role -> { //loop through roles
             authorities.add(new SimpleGrantedAuthority(role.getName())); //create a SimpleGrantedAuthority by passed in role, adding it all to the authorities list, list of roles gets past in for spring security
         });
-        // train spring security to User and Authorities
+        // Create and return a UserDetails object for Spring Security 
         return new org.springframework.security.core.userdetails.User(person.getEmail(), person.getPassword(), authorities);
     }
 
@@ -52,23 +51,23 @@ public class PersonDetailsService implements UserDetailsService {  // "implement
         return personJpaRepository.findAllByOrderByNameAsc();
     }
 
-    // custom query to find match to name or email
+    // Custom query to find match to name or email
     public  List<Person>list(String name, String email) {
         return personJpaRepository.findByNameContainingIgnoreCaseOrEmailContainingIgnoreCase(name, email);
     }
 
-    // custom query to find anything containing term in name or email ignoring case
+    // Custom query to find anything containing term in name or email ignoring case
     public  List<Person>listLike(String term) {
         return personJpaRepository.findByNameContainingIgnoreCaseOrEmailContainingIgnoreCase(term, term);
     }
 
-    // custom query to find anything containing term in name or email ignoring case
+    // Custom query to find anything containing term in name or email ignoring case
     public  List<Person>listLikeNative(String term) {
         String like_term = String.format("%%%s%%",term);  // Like required % rappers
         return personJpaRepository.findByLikeTermNative(like_term);
     }
 
-    // encode password prior to sava
+    // Encode password prior to save
     public void save(Person person) {
         person.setPassword(passwordEncoder().encode(person.getPassword()));
         personJpaRepository.save(person);

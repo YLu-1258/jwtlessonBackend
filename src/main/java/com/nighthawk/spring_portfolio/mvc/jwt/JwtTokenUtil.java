@@ -12,6 +12,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import javax.crypto.*;
 
+// PURPOSE: Validate JWT & extra info 
 
 @Component
 public class JwtTokenUtil {
@@ -27,12 +28,12 @@ public class JwtTokenUtil {
 		return k;
 	}
 
-	//retrieve username from jwt token
+	// Retrieve username from jwt token
 	public String getUsernameFromToken(String token) {
 		return getClaimFromToken(token, Claims::getSubject);
 	}
 
-	//retrieve expiration date from jwt token
+	// Retrieve expiration date from jwt token
 	public Date getExpirationDateFromToken(String token) {
 		return getClaimFromToken(token, Claims::getExpiration);
 	}
@@ -41,18 +42,18 @@ public class JwtTokenUtil {
 		final Claims claims = getAllClaimsFromToken(token);
 		return claimsResolver.apply(claims);
 	}
-    //for retrieving any information from token we will need the secret key
+    // For retrieving any information from token we will need the secret key
 	private Claims getAllClaimsFromToken(String token) {
 		return Jwts.parser().verifyWith(getSecretKey()).build().parseSignedClaims(token).getPayload();
 	}
 
-	//check if the token has expired
+	// Check if the token has expired
 	private Boolean isTokenExpired(String token) {
 		final Date expiration = getExpirationDateFromToken(token);
 		return expiration.before(new Date());
 	}
 
-	//generate token for user
+	// Generate token for user
 	public String generateToken(UserDetails userDetails) {
 		Map<String, Object> claims = new HashMap<>();
 		return doGenerateToken(claims, userDetails.getUsername());
@@ -70,7 +71,7 @@ public class JwtTokenUtil {
 				.signWith(getSecretKey()).compact();
 	}
 
-	//validate token
+	// VALIDATE TOKEN
 	public Boolean validateToken(String token, UserDetails userDetails) {
 		final String username = getUsernameFromToken(token);
 		return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
