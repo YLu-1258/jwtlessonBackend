@@ -62,6 +62,12 @@ public class Person {
     @NotEmpty
     private String password;
 
+    @NotEmpty
+    private String phone;
+
+    @NotEmpty
+    private String stuID;
+
     // @NonNull, etc placed in params of constructor: "@NonNull @Size(min = 2, max = 30, message = "Name (2 to 30 chars)") String name"
     @NonNull
     @Size(min = 2, max = 30, message = "Name (2 to 30 chars)")
@@ -88,10 +94,12 @@ public class Person {
     
 
     // Constructor used when building object from an API
-    public Person(String email, String password, String name, Date dob) {
+    public Person(String email, String password, String name, String phone, String stuid, Date dob) {
         this.email = email;
         this.password = password;
         this.name = name;
+        this.phone = phone;
+        this.stuID = stuid;
         this.dob = dob;
     }
 
@@ -105,63 +113,22 @@ public class Person {
 
     // Initialize static test data 
     public static Person[] init() {
-
-        // basics of class construction
         Person p1 = new Person();
-        p1.setName("Thomas Edison");
-        p1.setEmail("toby@gmail.com");
-        p1.setPassword("123Toby!");
-        // adding Note to notes collection
-        try {  // All data that converts formats could fail
-            Date d = new SimpleDateFormat("MM-dd-yyyy").parse("01-01-1840");
+        p1.setName("Eris29");
+        p1.setEmail("eris29@gmail.com");
+        p1.setPassword("Eris");
+        p1.setPhone("123-456-7890");
+        p1.setStuID("1937284");
+        try {
+            Date d = new SimpleDateFormat("MM-dd-yyyy").parse("11-29-2006");
             p1.setDob(d);
-        } catch (Exception e) {
-            // no actions as dob default is good enough
-        }
-
-        Person p2 = new Person();
-        p2.setName("Alexander Graham Bell");
-        p2.setEmail("lexb@gmail.com");
-        p2.setPassword("123LexB!");
-        try {
-            Date d = new SimpleDateFormat("MM-dd-yyyy").parse("01-01-1845");
-            p2.setDob(d);
-        } catch (Exception e) {
-        }
-
-        Person p3 = new Person();
-        p3.setName("Nikola Tesla");
-        p3.setEmail("niko@gmail.com");
-        p3.setPassword("123Niko!");
-        try {
-            Date d = new SimpleDateFormat("MM-dd-yyyy").parse("01-01-1850");
-            p3.setDob(d);
-        } catch (Exception e) {
-        }
-
-        Person p4 = new Person();
-        p4.setName("Madam Currie");
-        p4.setEmail("madam@gmail.com");
-        p4.setPassword("123Madam!");
-        try {
-            Date d = new SimpleDateFormat("MM-dd-yyyy").parse("01-01-1860");
-            p4.setDob(d);
-        } catch (Exception e) {
-        }
-
-        Person p5 = new Person();
-        p5.setName("John Mortensen");
-        p5.setEmail("jm1021@gmail.com");
-        p5.setPassword("123Qwerty!");
-        try {
-            Date d = new SimpleDateFormat("MM-dd-yyyy").parse("10-21-1959");
-            p5.setDob(d);
         } catch (Exception e) {
         }
 
         // Array definition and data initialization
-        Person persons[] = {p1, p2, p3, p4, p5};
+        Person persons[] = {p1};
         return(persons);
+        
     }
 
     public static void main(String[] args) {
